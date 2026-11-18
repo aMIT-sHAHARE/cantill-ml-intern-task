@@ -38,8 +38,6 @@ Zero-label run on all 37,029 labelled ERP lines (`--no-labels --no-llm`, offline
 
 Majority-class baseline at L1 is 35.6 %. The lexical seed alone scores 36.5 %: A's mining shorthand (`ROD DRIL;SIZE 35 MM`) shares almost no words with the tree names, so the offline result is a **floor**, not the expected result with embeddings or an LLM.
 
-**With embeddings / LLM (fill after running on my machine):** L1 ____ % · L2 ____ % · L3 ____ %.
-
 Other checks: B with labels, 70/30 hold-out → L1 97.4 %, L3 96.6 % · B zero-label offline → L1 53.1 %, L3 31.7 % · A supplier grouping P/R 1.0/1.0, item grouping 0.94/0.995 (outside label artifacts, see DECISIONS.md). The LLM path was tested with a mock model only; no accuracy claim is made for it.
 
 ## Runtime
