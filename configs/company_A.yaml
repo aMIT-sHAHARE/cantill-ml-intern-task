@@ -1,0 +1,56 @@
+# Company A: mining, reports in ZAR. Two systems: ERP (net, already ZAR) + invoice tool (GROSS, VAT).
+name: company_A
+data_dir: data/company_A
+reporting_currency: ZAR
+default_vat_rate: 0.15
+valid_years: [2000, 2100]
+taxonomy:
+  file: taxonomy_A.csv
+# Optional labelled examples (used only when present; --no-labels ignores them)
+labels:
+  file: labels_A.csv
+  id_column: record_id
+  level_columns: [category_l1, category_l2, category_l3]
+approved_statuses: [approved, paid]
+matching:
+  enabled: true
+  po_regex: '45\d{8}'
+  amount_tolerance: 0.01
+sources:
+  - name: erp
+    role: primary
+    file: erp_goods_receipts.csv
+    id_prefix: "ERP:"
+    amount_basis: net
+    currency_fixed: ZAR          # value_zar is already ZAR (document_currency is informational)
+    constants: {status: approved}   # goods receipts carry no status; treat as approved
+    columns:
+      record_id: line_id
+      date: posting_date
+      supplier_id: vendor_id
+      supplier_name: supplier_name
+      description: [material_short_text, service_short_text]
+      context: [spend_type, material_type]
+      amount: value_zar
+      quantity: quantity
+      po: po_number
+      po_item: po_item
+      item_code: material_number
+  - name: tool
+    role: secondary
+    file: invoice_tool_export.csv
+    id_prefix: "TOOL:"
+    amount_basis: gross           # net = gross / (1 + VAT); blank VAT -> default_vat_rate
+    date_formats: ["%d-%b-%y"]
+    columns:
+      record_id: tool_record_id
+      date: invoice_date
+      supplier_name: supplier_name_as_captured
+      description: line_text
+      amount: gross_amount
+      quantity: quantity
+      po: po_reference
+      invoice_number: invoice_number
+      status: status
+      vat_rate: vat_rate
+      currency: currency
