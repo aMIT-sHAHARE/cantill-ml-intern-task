@@ -1,0 +1,39 @@
+# Company B2: metal packaging, USD. Multiple ERPs/currencies, vendor_id only.
+name: company_B2
+data_dir: data/company_B2
+reporting_currency: USD
+default_vat_rate: 0.0
+valid_years: [2023, 2025]
+taxonomy:
+  file: ../company_B/taxonomy_B.csv
+labels:
+  file: ../company_B/seed_labels.csv
+  id_column: line_id
+  level_columns: [category_l1, category_l2, category_l3]
+fx:
+  file: fx_rates_usd (2).csv
+matching:
+  enabled: false
+sources:
+  - name: lines
+    role: primary
+    file: invoice_lines (2).csv
+    id_prefix: ""
+    amount_basis: net
+    constants: {status: approved}
+    columns:
+      record_id: line_id
+      date: [invoice_date, posting_date]
+      supplier_id: vendor_id
+      description: line_description
+      amount: line_amount
+      quantity: quantity
+      po: po_number
+      po_item: po_line
+      item_code: material_number
+      invoice_number: invoice_number
+      currency: currency
+      currency_rate: currency_rate
+      gl_account: gl_account
+      gl_desc: gl_account_description
+      doc_type: document_type
