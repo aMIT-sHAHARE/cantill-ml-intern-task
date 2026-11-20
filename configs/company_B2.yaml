@@ -1,0 +1,39 @@
+# Company B2 (blind test, same layout as B): metal packaging, USD. 8 ERPs, 25 currencies, vendor_id only.
+name: company_B2
+data_dir: data/company_B2
+reporting_currency: USD
+default_vat_rate: 0.0
+valid_years: [2023, 2025]        # invoice_date contains junk years (2021, 2027, 2073...)
+taxonomy:
+  file: ../company_B/taxonomy_B.csv      # reused from the B kit (not in the blind-test zip)
+labels:
+  file: ../company_B/seed_labels.csv     # B kit labels, same as company_B.yaml
+  id_column: line_id
+  level_columns: [category_l1, category_l2, category_l3]
+fx:
+  file: fx_rates_usd.csv         # B2's own fx file; fallback when a non-USD line has no currency_rate
+matching:
+  enabled: false
+sources:
+  - name: lines
+    role: primary
+    file: invoice_lines.csv
+    id_prefix: ""
+    amount_basis: net
+    constants: {status: approved}
+    columns:
+      record_id: line_id
+      date: [invoice_date, posting_date]    # first VALID date wins
+      supplier_id: vendor_id
+      description: line_description
+      amount: line_amount
+      quantity: quantity
+      po: po_number
+      po_item: po_line
+      item_code: material_number
+      invoice_number: invoice_number
+      currency: currency
+      currency_rate: currency_rate          # units of line currency per 1 USD
+      gl_account: gl_account
+      gl_desc: gl_account_description
+      doc_type: document_type

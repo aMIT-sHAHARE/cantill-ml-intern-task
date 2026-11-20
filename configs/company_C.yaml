@@ -1,0 +1,42 @@
+# Company C: oil & gas operator (Bluestem), USD, one invoice-line file, no labelled examples (zero-label).
+name: company_C
+data_dir: data/company_C
+reporting_currency: USD
+default_vat_rate: 0.0              # US sales tax is not a VAT; amounts treated as net
+valid_years: [2023, 2025]          # all dates are 2024; anything else is junk
+taxonomy:
+  file: category_tree_C.csv        # level_1 .. level_4
+approved_statuses: [approved]
+cancelled_keywords: [cancel, void, delet]
+matching:
+  enabled: false                   # single source, nothing to cross-match
+suppliers:
+  legal_suffixes: [llc, inc, corp, co, company, lp, llp, ltd, corporation, incorporated]
+non_procurement:
+  use_defaults: true
+  patterns:                        # extras seen in Company C's GL descriptions / line text
+    - {field: gl_desc, regex: "\\btax(es)?\\b"}                 # Accrued Ad Valorem / Severance Taxes
+    - {field: gl_desc, regex: "clearing|\\breceivable\\b|deductions payable|debt issuance"}
+    - {field: description, regex: "^\\s*tax\\s*$|inventory tax"}
+sources:
+  - name: lines
+    role: primary
+    file: invoice_lines.csv
+    id_prefix: ""
+    amount_basis: net
+    currency_fixed: USD
+    date_formats: ["%m/%d/%Y"]     # US month-first
+    date_dayfirst: false
+    keep_raw: [uom, buyer_entity]
+    columns:
+      record_id: line_id
+      date: invoice_date
+      supplier_name: supplier_name
+      description: [line_description, product_service_description]
+      context: [invoice_description]
+      amount: line_amount_usd
+      quantity: quantity
+      item_code: product_service_code
+      invoice_number: invoice_number
+      status: status
+      gl_desc: gl_account_description

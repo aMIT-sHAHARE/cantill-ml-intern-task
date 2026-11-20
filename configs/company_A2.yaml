@@ -1,0 +1,66 @@
+# Company A2 (blind test, same layout as A): South African mining, ZAR.
+# ERP goods receipts (primary, net) + invoice tool (secondary, gross incl. VAT) -> ERP/tool de-duplication.
+name: company_A2
+data_dir: data/company_A2
+reporting_currency: ZAR            # CHECK: set to whatever your company_A.yaml uses
+default_vat_rate: 0.15             # SA VAT; blank VAT in the tool = 15%
+valid_years: [2020, 2025]
+taxonomy:
+  file: ../company_A/taxonomy_A.csv      # reused from the A kit (data/company_A)
+# Labels disabled: labels_A.csv has no 'line_id' column (run crashed with KeyError).
+# To turn them back on, replace id_column / level_columns with the real headers of labels_A.csv:
+# labels:
+#   file: ../company_A/labels_A.csv
+#   id_column: <id column in labels_A.csv>
+#   level_columns: [<l1 column>, <l2 column>, <l3 column>]
+approved_statuses: [approved, paid]      # tool: Paid/Approved kept; Cancelled -> CANCELLED; Rejected/On Hold -> NOT_APPROVED
+cancelled_keywords: [cancel, void, delet]
+matching:
+  enabled: true
+  po_regex: "\\d{8,12}"                  # PO 4510146289 / PO#4510142616 / 4510137343/10.0
+  amount_tolerance: 0.01
+  min_text_sim_no_po: 0.5
+  dedupe_secondary_exact: true
+suppliers:
+  legal_suffixes: [pty, ltd, "(pty)", limited, cc, inc]
+sources:
+  - name: erp
+    role: primary
+    file: erp_goods_receipts.csv
+    id_prefix: ""
+    amount_basis: net
+    currency_fixed: ZAR
+    date_formats: ["%Y-%m-%d"]
+    keep_raw: [material_type, spend_type]
+    columns:
+      record_id: line_id
+      date: posting_date
+      supplier_id: vendor_id
+      supplier_name: supplier_name
+      description: [material_short_text, service_short_text]
+      context: [spend_type, material_type]
+      amount: value_zar
+      quantity: quantity
+      po: po_number
+      po_item: po_item
+      item_code: material_number
+
+  - name: tool
+    role: secondary
+    file: invoice_tool_export.csv
+    id_prefix: ""
+    amount_basis: gross
+    currency_fixed: ZAR
+    date_formats: ["%d/%m/%Y", "%d-%b-%y", "%Y-%m-%d"]
+    date_dayfirst: true
+    columns:
+      record_id: tool_record_id
+      date: invoice_date
+      supplier_name: supplier_name_as_captured
+      description: line_text
+      amount: gross_amount
+      quantity: quantity
+      po: po_reference
+      invoice_number: invoice_number
+      status: status
+      vat_rate: vat_rate
